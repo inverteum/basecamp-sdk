@@ -55,13 +55,14 @@ returned JSON. Rust returns the first page, as for the lists.
 
 ### Reports: the overdue to-dos report comes in pages
 
-Basecamp now pages `GET /reports/todos/overdue.json` (bc3 #14519): 15, 30, 50,
-then 100 to-dos, latest first, each page holding the same four lateness groups
-with only its own to-dos. Every SDK's overdue report now takes an optional
-`page`. No SDK follows the pages for you, because the report is four lists, not
-one. Without `page` you get the first page, where you used to get every overdue
-to-do, so code that wants them all must ask for page 2, 3 and on until a page
-comes back with nothing in it, or, in Go, until `Meta.Truncated` is false.
+Basecamp now pages `GET /reports/todos/overdue.json` at 50 to-dos a page
+(bc3 #14519, bc3 #14537), latest first, each page holding the same four
+lateness groups with only its own to-dos. Every SDK's overdue report now takes
+an optional `page`. No SDK follows the pages for you, because the report is
+four lists, not one. Without `page` you get the first page, where you used to
+get every overdue to-do, so code that wants them all must ask for page 2, 3
+and on until a page comes back with nothing in it, or, in Go, until
+`Meta.Truncated` is false.
 
 - **Go.** `ReportsService.OverdueTodos(ctx)` becomes
   `OverdueTodos(ctx, page int32)`; pass 0 for the first page.
