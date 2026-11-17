@@ -5875,6 +5875,12 @@ type GetEverythingMessagesParams struct {
 	Page *int32 `form:"page,omitempty" json:"page,omitempty"`
 }
 
+// GetMyCompletedAssignmentsParams defines parameters for GetMyCompletedAssignments.
+type GetMyCompletedAssignmentsParams struct {
+	// Page Page number for paginating through results. Defaults to 1. A positive value selects exactly that page, not a starting offset; see SPEC section 8.
+	Page *int32 `form:"page,omitempty" json:"page,omitempty"`
+}
+
 // GetMyDueAssignmentsParams defines parameters for GetMyDueAssignments.
 type GetMyDueAssignmentsParams struct {
 	// Scope Filter by due date range: overdue, due_today, due_tomorrow,
@@ -7609,7 +7615,7 @@ type ClientInterface interface {
 	GetMyAssignments(ctx context.Context, accountId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetMyCompletedAssignments request
-	GetMyCompletedAssignments(ctx context.Context, accountId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetMyCompletedAssignments(ctx context.Context, accountId string, params *GetMyCompletedAssignmentsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetMyDueAssignments request
 	GetMyDueAssignments(ctx context.Context, accountId string, params *GetMyDueAssignmentsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -10068,10 +10074,10 @@ func (c *Client) GetMyAssignments(ctx context.Context, accountId string, reqEdit
 
 // GetMyCompletedAssignments is marked as idempotent and will be retried on transient failures.
 
-func (c *Client) GetMyCompletedAssignments(ctx context.Context, accountId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *Client) GetMyCompletedAssignments(ctx context.Context, accountId string, params *GetMyCompletedAssignmentsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 
 	return c.doWithRetry(ctx, func() (*http.Request, error) {
-		return NewGetMyCompletedAssignmentsRequest(c.Server, accountId)
+		return NewGetMyCompletedAssignmentsRequest(c.Server, accountId, params)
 	}, true, "GetMyCompletedAssignments", reqEditors...)
 
 }
@@ -19373,7 +19379,7 @@ func NewGetMyAssignmentsRequest(server string, accountId string) (*http.Request,
 }
 
 // NewGetMyCompletedAssignmentsRequest generates requests for GetMyCompletedAssignments
-func NewGetMyCompletedAssignmentsRequest(server string, accountId string) (*http.Request, error) {
+func NewGetMyCompletedAssignmentsRequest(server string, accountId string, params *GetMyCompletedAssignmentsParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -19396,6 +19402,28 @@ func NewGetMyCompletedAssignmentsRequest(server string, accountId string) (*http
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Page != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page", runtime.ParamLocationQuery, *params.Page); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -31447,7 +31475,7 @@ type ClientWithResponsesInterface interface {
 	GetMyAssignmentsWithResponse(ctx context.Context, accountId string, reqEditors ...RequestEditorFn) (*GetMyAssignmentsResponse, error)
 
 	// GetMyCompletedAssignmentsWithResponse request
-	GetMyCompletedAssignmentsWithResponse(ctx context.Context, accountId string, reqEditors ...RequestEditorFn) (*GetMyCompletedAssignmentsResponse, error)
+	GetMyCompletedAssignmentsWithResponse(ctx context.Context, accountId string, params *GetMyCompletedAssignmentsParams, reqEditors ...RequestEditorFn) (*GetMyCompletedAssignmentsResponse, error)
 
 	// GetMyDueAssignmentsWithResponse request
 	GetMyDueAssignmentsWithResponse(ctx context.Context, accountId string, params *GetMyDueAssignmentsParams, reqEditors ...RequestEditorFn) (*GetMyDueAssignmentsResponse, error)
@@ -43851,8 +43879,8 @@ func (c *ClientWithResponses) GetMyAssignmentsWithResponse(ctx context.Context, 
 }
 
 // GetMyCompletedAssignmentsWithResponse request returning *GetMyCompletedAssignmentsResponse
-func (c *ClientWithResponses) GetMyCompletedAssignmentsWithResponse(ctx context.Context, accountId string, reqEditors ...RequestEditorFn) (*GetMyCompletedAssignmentsResponse, error) {
-	rsp, err := c.GetMyCompletedAssignments(ctx, accountId, reqEditors...)
+func (c *ClientWithResponses) GetMyCompletedAssignmentsWithResponse(ctx context.Context, accountId string, params *GetMyCompletedAssignmentsParams, reqEditors ...RequestEditorFn) (*GetMyCompletedAssignmentsResponse, error) {
+	rsp, err := c.GetMyCompletedAssignments(ctx, accountId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}

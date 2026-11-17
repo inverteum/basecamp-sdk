@@ -1,7 +1,7 @@
 {
   "$schema": "https://basecamp.com/schemas/sdk-metadata.json",
   "version": "1.0.0",
-  "generated": "2026-11-17T22:21:17Z",
+  "generated": "2026-11-17T22:23:04Z",
   "operations": {
     "GetAccount": {
       "retry": {
@@ -1589,6 +1589,11 @@
           429,
           503
         ]
+      },
+      "pagination": {
+        "style": "link",
+        "totalCountHeader": "X-Total-Count",
+        "maxPageSize": 50
       }
     },
     "GetMyDueAssignments": {
